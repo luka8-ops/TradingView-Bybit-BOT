@@ -28,6 +28,13 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
     print(f"Received signal for {payload.symbol}: {payload.action}")
 
     try:
+        bybit_client.set_leverage(
+            category="linear",
+            symbol="BTCUSDT",
+            buyLeverage="20",
+            sellLeverage="20"
+        )
+
         if payload.action == "open_long":
             # Place a market buy order using pybit's place_order method
             bybit_client.place_order(
@@ -35,8 +42,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 symbol=payload.symbol,
                 side="Buy",
                 orderType="Market",
-                qty=payload.qty,
-                leverage=str(payload.leverage)
+                qty=payload.qty
             )
 
             # Set the SL and TP if provided
@@ -59,8 +65,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 symbol=payload.symbol,
                 side="Sell",
                 orderType="Market",
-                qty=payload.qty,
-                leverage=str(payload.leverage)
+                qty=payload.qty
             )
 
             # Set the SL and TP if provided

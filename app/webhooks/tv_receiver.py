@@ -31,8 +31,8 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
         bybit_client.set_leverage(
             category="linear",
             symbol="BTCUSDT",
-            buyLeverage="20",
-            sellLeverage="20"
+            buyLeverage=payload.leverage,
+            sellLeverage=payload.leverage
         )
 
         if payload.action == "open_long":

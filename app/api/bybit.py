@@ -6,7 +6,7 @@ from app.config import settings
 # The HTTP client automatically handles HMAC-SHA256 signing.
 # We will use the mainnet by default, as defined in our config.
 bybit_client = HTTP(
-    testnet=False, # Set to True for testnet
+    testnet=True, # Set to True for testnet
     api_key=settings.BYBIT_API_KEY,
     api_secret=settings.BYBIT_API_SECRET,
 )

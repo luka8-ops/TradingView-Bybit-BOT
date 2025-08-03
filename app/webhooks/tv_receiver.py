@@ -44,9 +44,10 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 bybit_client.set_trading_stop(
                     category="linear",
                     symbol=payload.symbol,
-                    tpPrice=payload.take_profit_price if payload.take_profit_price else None,
-                    slPrice=payload.stop_loss_price if payload.stop_loss_price else None,
-                    tpslMode="Full"
+                    takeProfit=payload.take_profit_price if payload.take_profit_price else None,
+                    stopLoss=payload.stop_loss_price if payload.stop_loss_price else None,
+                    tpslMode="Full",
+                    positionIdx=0
                 )
 
             return {"status": "success", "message": f"Long position opened and stops set for {payload.symbol}."}
@@ -67,9 +68,10 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 bybit_client.set_trading_stop(
                     category="linear",
                     symbol=payload.symbol,
-                    tpPrice=payload.take_profit_price if payload.take_profit_price else None,
-                    slPrice=payload.stop_loss_price if payload.stop_loss_price else None,
-                    tpslMode="Full"
+                    takeProfit=payload.take_profit_price if payload.take_profit_price else None,
+                    stopLoss=payload.stop_loss_price if payload.stop_loss_price else None,
+                    tpslMode="Full",
+                    positionIdx=0
                 )
 
             return {"status": "success", "message": f"Short position opened and stops set for {payload.symbol}."}
@@ -103,6 +105,4 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        # The pybit library returns a rich error object. We can inspect it if needed.
-        # For now, a generic 500 error is fine.
         raise HTTPException(status_code=500, detail=f"Failed to execute trade: {e}")

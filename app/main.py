@@ -7,7 +7,7 @@ app = FastAPI(
     description="Backend to receive TradingView webhooks and execute trades on Bybit V5."
 )
 
-app.include_router(webhooks_router, prefix="/webhooks", tags=["Webhooks"])
+app.include_router(webhooks_router, tags=["Webhooks"])
 
 @app.get("/")
 def read_root():

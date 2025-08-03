@@ -34,7 +34,13 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
             buyLeverage=str(payload.leverage),
             sellLeverage=str(payload.leverage)
         )
+    except Exception as e:
+        if "110043" in str(e):
+            pass  # leverage already set, ignore
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to set leverage: {e}")
 
+    try:
         if payload.action == "open_long":
             # Place a market buy order using pybit's place_order method
             bybit_client.place_order(

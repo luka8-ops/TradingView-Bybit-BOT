@@ -2,17 +2,24 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+import logging
+import time
 from app.config import settings
 from app.api.bybit import bybit_client
-import time
 
 router = APIRouter()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 class TradingViewPayload(BaseModel):
     passphrase: str
     symbol: str
     action: str
-    entry_price: float
+    entry_price: str
 
 # Define your static trading parameters here
 QUANTITY = "0.004"  
@@ -25,6 +32,8 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
     """
     Receives and validates webhook alerts from TradingView and executes trades.
     """
+    logger.info(f"Received webhook payload: {payload.model_dump()}")
+
     if payload.passphrase != settings.TRADINGVIEW_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid passphrase")
 
@@ -109,12 +118,13 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
 
 # Calculates and sets Take Profit and Stop Loss for the given symbol and trade direction.
 def set_tp_sl(symbol: str, entry_price: float, action: str):
+    price = float(entry_price)
     if action == "buy":
-        tp_price = entry_price * (1 + (TP_PERCENT / LEVERAGE / 100))
-        sl_price = entry_price * (1 - (SL_PERCENT / LEVERAGE / 100))
+        tp_price = price * (1 + (TP_PERCENT / LEVERAGE / 100))
+        sl_price = price * (1 - (SL_PERCENT / LEVERAGE / 100))
     elif action == "sell":
-        tp_price = entry_price * (1 - (TP_PERCENT / LEVERAGE / 100))
-        sl_price = entry_price * (1 + (SL_PERCENT / LEVERAGE / 100))
+        tp_price = price * (1 - (TP_PERCENT / LEVERAGE / 100))
+        sl_price = price * (1 + (SL_PERCENT / LEVERAGE / 100))
     else:
         raise ValueError("Invalid action for TP/SL calculation")
 

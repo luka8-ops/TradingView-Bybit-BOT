@@ -12,7 +12,7 @@ class TradingViewPayload(BaseModel):
     passphrase: str
     symbol: str
     action: str
-    entry_price: str
+    entry_price: float
 
 # Define your static trading parameters here
 QUANTITY = "0.001"  
@@ -28,10 +28,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
     if payload.passphrase != settings.TRADINGVIEW_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid passphrase")
 
-    print(f"Received signal for {payload.symbol}: {payload.action}")
-
-    if payload.symbol.endswith(".P"):
-        payload.symbol = payload.symbol.replace(".P", "")
+    payload.symbol = payload.symbol.replace(".P", "")
     
     print(f"Received signal for {payload.symbol}: {payload.action}")
 

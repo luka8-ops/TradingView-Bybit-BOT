@@ -103,8 +103,8 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
             raise HTTPException(status_code=500, detail=f"Invalid position response: {e}")
         
         if size > 0:
-            print("✅ Position opened")
-            return  # Position is open
+            print("Position opened")
+            return  
         time.sleep(delay)
     
     raise HTTPException(status_code=500, detail="Position not open after waiting")
@@ -126,12 +126,10 @@ def set_tp_sl(symbol: str, entry_price: float, action: str):
         category="linear",
         symbol=symbol,
         positionIdx=0,                
-        tpPrice=str(tp_price),
-        slPrice=str(sl_price),
+        takeProfit=str(tp_price),
+        stopLoss=str(sl_price),
         tpTriggerBy="LastPrice",
         slTriggerBy="LastPrice",
-        tpslMode="Full",            
-        tpOrderType="Market",      
-        slOrderType="Market"
+        tpslMode="Full"
     )
 

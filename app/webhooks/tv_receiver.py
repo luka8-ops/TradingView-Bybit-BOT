@@ -121,7 +121,13 @@ def set_tp_sl(symbol: str, entry_price: float, action: str):
     bybit_client.set_trading_stop(
         category="linear",
         symbol=symbol,
+        positionIdx=0,                
         tpPrice=str(tp_price),
         slPrice=str(sl_price),
-        tpslMode="Full"
+        tpTriggerBy="LastPrice",
+        slTriggerBy="LastPrice",
+        tpslMode="Full",            
+        tpOrderType="Market",      
+        slOrderType="Market"
     )
+

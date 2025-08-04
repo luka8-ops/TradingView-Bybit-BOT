@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from app.webhooks.tv_receiver import router as webhooks_router
-from app.ip_whitelist import IPWhitelistMiddleware
+# from app.ip_whitelist import IPWhitelistMiddleware
 
 app = FastAPI(
     title="Trading Bot API",

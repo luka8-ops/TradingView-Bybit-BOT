@@ -29,6 +29,11 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
 
     print(f"Received signal for {payload.symbol}: {payload.action}")
 
+    if payload.symbol.endswith(".P"):
+        payload.symbol = payload.symbol.replace(".P", "")
+    
+    print(f"Received signal for {payload.symbol}: {payload.action}")
+
     try:
         # First, we set the leverage for the symbol
         try:

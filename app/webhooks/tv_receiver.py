@@ -15,7 +15,7 @@ class TradingViewPayload(BaseModel):
     entry_price: float
 
 # Define your static trading parameters here
-QUANTITY = "0.0015"  
+QUANTITY = "0.002"  
 TP_PERCENT = 4.3
 SL_PERCENT = 1.0
 LEVERAGE = 20

@@ -60,6 +60,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 orderType="Market",
                 qty=QUANTITY
             )
+            time.sleep(5)
 
             # 3. Calculate SL and TP prices from our static percentages
             tp_price = payload.entry_price * (1 + (TP_PERCENT / 100))
@@ -85,6 +86,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 orderType="Market",
                 qty=QUANTITY
             )
+            time.sleep(5)
 
             # 3. Calculate SL and TP prices (reversed for a short position)
             tp_price = payload.entry_price * (1 - (TP_PERCENT / 100))

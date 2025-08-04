@@ -87,10 +87,8 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
         print(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute trade: {e}")
     
+# Polls the Bybit API until a position is open for the given symbol.
 def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.5):
-    """
-    Polls the Bybit API until a position is open for the given symbol.
-    """
     for attempt in range(max_retries):
         position = bybit_client.get_positions(
             category="linear",
@@ -109,16 +107,14 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
     
     raise HTTPException(status_code=500, detail="Position not open after waiting")
 
+# Calculates and sets Take Profit and Stop Loss for the given symbol and trade direction.
 def set_tp_sl(symbol: str, entry_price: float, action: str):
-    """
-    Calculates and sets Take Profit and Stop Loss for the given symbol and trade direction.
-    """
     if action == "buy":
-        tp_price = entry_price * (1 + (TP_PERCENT / 100))
-        sl_price = entry_price * (1 - (SL_PERCENT / 100))
+        tp_price = entry_price * (1 + (TP_PERCENT / LEVERAGE / 100))
+        sl_price = entry_price * (1 - (SL_PERCENT / LEVERAGE / 100))
     elif action == "sell":
-        tp_price = entry_price * (1 - (TP_PERCENT / 100))
-        sl_price = entry_price * (1 + (SL_PERCENT / 100))
+        tp_price = entry_price * (1 - (TP_PERCENT / LEVERAGE / 100))
+        sl_price = entry_price * (1 + (SL_PERCENT / LEVERAGE / 100))
     else:
         raise ValueError("Invalid action for TP/SL calculation")
 

@@ -53,7 +53,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
         # Now, we process the trading action
         if payload.action == "buy":
             # 1. Place the initial market buy order
-            bybit_client.place_order(
+            response = bybit_client.place_order(
                 category="linear",
                 symbol=SYMBOL,
                 side="Buy",
@@ -64,11 +64,12 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
             wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
+            print("Order response:", response)
             return {"status": "success", "message": f"Long position opened and stops set for {payload.symbol}."}
 
         elif payload.action == "sell":
             # 1. Place a market sell order
-            bybit_client.place_order(
+            response = bybit_client.place_order(
                 category="linear",
                 symbol=SYMBOL,
                 side="Sell",
@@ -79,6 +80,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
             wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
+            print("Order response:", response)
             return {"status": "success", "message": f"Short position opened and stops set for {payload.symbol}."}
 
     except Exception as e:
@@ -96,10 +98,12 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
         )
         try:
             size = float(position["result"]["list"][0]["size"])
+            print(f"[Attempt {attempt + 1}] Position size: {size}")
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Invalid position response: {e}")
         
         if size > 0:
+            print("✅ Position opened")
             return  # Position is open
         time.sleep(delay)
     

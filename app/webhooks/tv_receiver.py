@@ -39,7 +39,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
 
     SYMBOL = payload.symbol.replace(".P", "")
     
-    print(f"Received signal for {payload.symbol}: {payload.action}")
+    logger.info(f"Received signal for {payload.symbol}: {payload.action}")
 
     try:
         # First, we set the leverage for the symbol
@@ -50,11 +50,11 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 buyLeverage=str(LEVERAGE),
                 sellLeverage=str(LEVERAGE)
             )
-            print(f"Leverage set to {LEVERAGE}x for {payload.symbol}")
+            logger.info(f"Leverage set to {LEVERAGE}x for {payload.symbol}")
         except Exception as e:
             # Bybit returns ErrCode: 110043 if leverage is already set, which we can ignore
             if "110043" in str(e):
-                print(f"Leverage is already set for {payload.symbol}, ignoring.")
+                logger.info(f"Leverage is already set for {payload.symbol}, ignoring.")
             else:
                 # If it's another error, something is wrong
                 raise HTTPException(status_code=500, detail=f"Failed to set leverage: {e}")
@@ -73,7 +73,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
             wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
-            print("Order response:", response)
+            logger.info("Order response:", response)
             return {"status": "success", "message": f"Long position opened and stops set for {payload.symbol}."}
 
         elif payload.action == "sell":
@@ -89,11 +89,11 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
             wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
-            print("Order response:", response)
+            logger.info("Order response:", response)
             return {"status": "success", "message": f"Short position opened and stops set for {payload.symbol}."}
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.info(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute trade: {e}")
     
 # Polls the Bybit API until a position is open for the given symbol.
@@ -105,12 +105,12 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
         )
         try:
             size = float(position["result"]["list"][0]["size"])
-            print(f"[Attempt {attempt + 1}] Position size: {size}")
+            logger.info(f"[Attempt {attempt + 1}] Position size: {size}")
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise HTTPException(status_code=500, detail=f"Invalid position response: {e}")
         
         if size > 0:
-            print("Position opened")
+            logger.info("Position opened")
             return  
         time.sleep(delay)
     
@@ -118,24 +118,43 @@ def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.
 
 # Calculates and sets Take Profit and Stop Loss for the given symbol and trade direction.
 def set_tp_sl(symbol: str, entry_price: float, action: str):
-    price = float(entry_price)
-    if action == "buy":
-        tp_price = price * (1 + (TP_PERCENT / LEVERAGE / 100))
-        sl_price = price * (1 - (SL_PERCENT / LEVERAGE / 100))
-    elif action == "sell":
-        tp_price = price * (1 - (TP_PERCENT / LEVERAGE / 100))
-        sl_price = price * (1 + (SL_PERCENT / LEVERAGE / 100))
-    else:
-        raise ValueError("Invalid action for TP/SL calculation")
+    try: 
+        price = float(entry_price)
+        if action == "buy":
+            tp_price = price * (1 + (TP_PERCENT / LEVERAGE / 100))
+            sl_price = price * (1 - (SL_PERCENT / LEVERAGE / 100))
 
-    bybit_client.set_trading_stop(
-        category="linear",
-        symbol=symbol,
-        positionIdx=0,                
-        takeProfit=str(tp_price),
-        stopLoss=str(sl_price),
-        tpTriggerBy="LastPrice",
-        slTriggerBy="LastPrice",
-        tpslMode="Full"
-    )
+            tp_limit_price = tp_price * 0.999
+            sl_limit_price = sl_price * 0.999
 
+        elif action == "sell":
+            tp_price = price * (1 - (TP_PERCENT / LEVERAGE / 100))
+            sl_price = price * (1 + (SL_PERCENT / LEVERAGE / 100))
+
+            tp_limit_price = tp_price * 1.001
+            sl_limit_price = sl_price * 1.001
+
+        else:
+            raise ValueError("Invalid action for TP/SL calculation")
+
+        bybit_client.set_trading_stop(
+            category="linear",
+            symbol=symbol,
+            positionIdx=0,
+            takeProfit=str(tp_price),
+            stopLoss=str(sl_price),
+            tpTriggerBy="LastPrice",
+            slTriggerBy="LastPrice",
+            tpslMode="Partial",
+            tpOrderType="Limit",
+            slOrderType="Limit",
+            tpLimitPrice=str(tp_limit_price),  # Specify the limit price for TP
+            slLimitPrice=str(sl_limit_price),  # Specify the limit price for SL
+            tpSize=QUANTITY,                   # Specify TP size
+            slSize=QUANTITY                    # Specify SL size, must equal tpSize
+        )
+        
+    except ValueError as e:
+        print(f"Error in TP/SL calculation: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")

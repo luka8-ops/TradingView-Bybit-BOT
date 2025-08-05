@@ -32,7 +32,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
     """
     Receives and validates webhook alerts from TradingView and executes trades.
     """
-    logger.info(f"Received webhook payload: {payload.model_dump()}")
+    # logger.info(f"Received webhook payload: {payload.model_dump()}")
 
     if payload.passphrase != settings.TRADINGVIEW_PASSPHRASE:
         raise HTTPException(status_code=401, detail="Invalid passphrase")

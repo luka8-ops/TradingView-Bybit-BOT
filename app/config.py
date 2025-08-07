@@ -5,12 +5,11 @@ class Settings(BaseSettings):
     """
     Application settings loaded from environment variables.
     """
-    BYBIT_API_KEY: str
-    BYBIT_API_SECRET: str
-    TRADINGVIEW_PASSPHRASE: str
+    API_KEY_PRIVATE_KEY: str
+    ACCOUNT_INDEX: str
+    API_KEY_INDEX: str
 
-    BYBIT_BASE_URL: str = "https://api.bybit.com"
-    BYBIT_RECV_WINDOW: int = 5000
+    BASE_URL: str = "https://testnet.zklighter.elliot.ai"
 
     class Config:
         pass

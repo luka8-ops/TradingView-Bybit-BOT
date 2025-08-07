@@ -5,7 +5,7 @@ from typing import Optional
 import logging
 import time
 from app.config import settings
-from app.api.bybit import bybit_client
+from app.api.lighter import bybit_client
 
 router = APIRouter()
 
@@ -22,10 +22,10 @@ class TradingViewPayload(BaseModel):
     entry_price: str
 
 # Define your static trading parameters here
-QUANTITY = "0.004"  
-TP_PERCENT = 4.3
-SL_PERCENT = 1.0
-LEVERAGE = 20
+QUANTITY = "0.005"  
+TP_PERCENT = 7.5
+SL_PERCENT = 1.2
+LEVERAGE = 30
 
 @router.post("/tradingview-webhook")
 async def handle_tradingview_webhook(payload: TradingViewPayload):

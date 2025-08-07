@@ -22,10 +22,10 @@ class TradingViewPayload(BaseModel):
     entry_price: str
 
 # Define your static trading parameters here
-QUANTITY = "0.004"  
-TP_PERCENT = 4.3
-SL_PERCENT = 1.0
-LEVERAGE = 20
+QUANTITY = "0.005"  
+TP_PERCENT = 7.2
+SL_PERCENT = 1.2
+LEVERAGE = 30
 
 @router.post("/tradingview-webhook")
 async def handle_tradingview_webhook(payload: TradingViewPayload):
@@ -70,7 +70,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 qty=QUANTITY
             )
             
-            wait_for_position_open(SYMBOL)
+            # wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
             logger.info("Order response:", response)
@@ -86,7 +86,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 qty=QUANTITY
             )
 
-            wait_for_position_open(SYMBOL)
+            # wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
             logger.info("Order response:", response)

@@ -39,7 +39,7 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
 
     SYMBOL = payload.symbol.replace(".P", "")
     
-    logger.info(f"Received signal for {payload.symbol}: {payload.action}")
+    logger.info(f"Received signal for {payload.symbol}: {payload.action}. PAYLOAD PRICE: {payload.entry_price}")
 
     try:
         # First, we set the leverage for the symbol

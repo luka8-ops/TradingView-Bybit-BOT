@@ -70,7 +70,6 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 qty=QUANTITY
             )
             
-            # wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
             logger.info("Order response:", response)
@@ -86,7 +85,6 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
                 qty=QUANTITY
             )
 
-            # wait_for_position_open(SYMBOL)
             set_tp_sl(symbol=SYMBOL, entry_price=payload.entry_price, action=payload.action)
 
             logger.info("Order response:", response)
@@ -95,26 +93,6 @@ async def handle_tradingview_webhook(payload: TradingViewPayload):
     except Exception as e:
         logger.info(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute trade: {e}")
-    
-# Polls the Bybit API until a position is open for the given symbol.
-def wait_for_position_open(symbol: str, max_retries: int = 10, delay: float = 0.5):
-    for attempt in range(max_retries):
-        position = bybit_client.get_positions(
-            category="linear",
-            symbol=symbol
-        )
-        try:
-            size = float(position["result"]["list"][0]["size"])
-            logger.info(f"[Attempt {attempt + 1}] Position size: {size}")
-        except (KeyError, IndexError, TypeError, ValueError) as e:
-            raise HTTPException(status_code=500, detail=f"Invalid position response: {e}")
-        
-        if size > 0:
-            logger.info("Position opened")
-            return  
-        time.sleep(delay)
-    
-    raise HTTPException(status_code=500, detail="Position not open after waiting")
 
 # Calculates and sets Take Profit and Stop Loss for the given symbol and trade direction.
 def set_tp_sl(symbol: str, entry_price: float, action: str):
